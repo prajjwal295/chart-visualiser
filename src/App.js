@@ -1,26 +1,23 @@
 import React from "react";
-import Navbar from "./component/Navbar";
 import { Route, Routes } from "react-router-dom";
-import Home from "./component/Home";
-import Login from "./component/Login";
-import Signin from "./component/Signin";
-import AditonalDetails from "./component/AditonalDetails";
-import Profile from "./component/Profile";
+import Dashboard from "./Dashboard";
+import AddDataForm from "./AddDataForm";
+import NavBar from "./NavBar";
+import Home from "./Home";
 
-const App = () => {
+function App() {
   return (
-    <div className="max-w-screen min-h-screen bg-[#254f1a] flex flex-col font-inter">
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signin" element={<Signin />} />
-        <Route path="/additionalDetails" element={<AditonalDetails />} />
-        <Route path="/profile/:userId" element={<Profile />} />
-      </Routes>
+    <div className="App">
+      <NavBar />
+      <div className="container mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/add-data" element={<AddDataForm />} />
+        </Routes>
+      </div>
     </div>
   );
-};
+}
 
 export default App;

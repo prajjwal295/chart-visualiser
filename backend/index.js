@@ -1,70 +1,56 @@
 const express = require("express");
-const app = express();
-const database = require("./config/database");
-const cookieParser = require("cookie-parser");
+const mongoose = require("mongoose");
 const cors = require("cors");
+const bodyParser = require("body-parser");
+const EnergyData = require("./models/EnergyData");
 
-const { cloudinaryConnect } = require("./config/cloudinary");
-const fileUpload = require("express-fileupload");
-
-require("dotenv").config();
-const Port = process.env.PORT || 4000;
-
-// db connect
-database.connect();
+const app = express();
 
 const corsOptions = {
-  origin: [
-    "http://localhost:3000",
-    "social-view-762f9.web.app",
-    "https://social-view-762f9.firebaseapp.com/",
-    "https://qviq-three.vercel.app",
-  ],
+  origin: ["http://localhost:3000"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
-// middlewares
-app.use(express.json());
-app.use(cookieParser());
+app.use(bodyParser.json());
+const port = process.env.PORT || 4000;
+
 app.use(cors(corsOptions));
 
-app.use(fileUpload({ useTempFiles: true, tempFileDir: "/tmp" }));
-
-cloudinaryConnect();
-
-// app.use("/api/v1/auth", authRoutes);
-
-const {
-  signup,
-  updateProfile,
-  getUserData,
-  signupWithGoogle,
-  deleteUser,
-} = require("./controller/Auth");
-
-const { auth } = require("./middleware/auth");
-
-app.post("/auth/signup", auth, signup);
-app.post("/auth/signupWithGoogle", auth, signupWithGoogle);
-app.put("/auth/updateProfile", auth, updateProfile);
-app.get("/auth/getUserDetails/:id", getUserData);
-app.delete("/auth/deleteUser", auth, deleteUser);
-
-// default route
-app.get("/", (req, res) => {
-  return res.json({
-    success: true,
-    message: "Your server is running",
+mongoose
+  .connect(
+    "mongodb+srv://prajjwal295:prajjwal@cluster0.x5ftfqq.mongodb.net/",
+    {}
+  )
+  .then(() => {
+    console.log("db successfull");
+  })
+  .catch((err) => {
+    console.log("db error");
+    console.error(err);
+    process.exit(1);
   });
+
+app.get("/api/data", async (req, res) => {
+  try {
+    const data = await EnergyData.find();
+    res.json(data);
+  } catch (error) {
+    res.status(500).send(error);
+  }
 });
 
-// activate server
-app
-  .listen(Port, () => {
-    console.log(`app listens at ${Port}`);
-  })
-  .on("error", (err) => {
-    console.error("Server start error:", err);
-  });
+app.post("/api/PostData", async (req, res) => {
+  try {
+    const newData = new EnergyData(req.body);
+    await newData.save();
+    res.status(201).json(newData);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
